@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaspa Mining ROI Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gradient-to-r from-gray-900 to-blue-900 text-white min-h-screen flex flex-col items-center justify-center p-8">
+  <div class="bg-white/10 z-10 backdrop-blur-md p-5 md:p-8 rounded-2xl shadow-lg max-w-3xl">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-4 mb-4">
+      <h3 class="text-2xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">
+        Kaspa Mining ROI Calculator
+      </h3>
+      <p class="text-sm font-semibold text-white mt-2 sm:mt-0" id="report-date"></p>
+    </div>
+
+    <hr class="mb-4 ">
+    <div class="flex flex-col lg:flex-row gap-8 max-w-3xl">
+      <div class="flex-1 space-y-4">
+        <label class="block text-sm font-semibold">Electricity Price per kWh ($)
+          <input id="elPrice" type="number" step="0.01" value="0.07"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <label class="block text-sm font-semibold">Kaspa per Day per TH/s
+          <input id="kaspPerDay" type="number" step="0.1" value="5.5"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <label class="block text-sm font-semibold">Kaspa Price in USD
+          <input id="kaspaUSD" type="number" step="0.01" value="0.09"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <label class="block text-sm font-semibold">Price per TH/s ($)
+          <input id="pricePerThs" type="number" step="0.1" value="68"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <label class="block text-sm font-semibold">Spending KW per TH/s
+          <input id="kwPerThs" type="number" step="0.01" value="0.14"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <label class="block text-sm font-semibold">Investment Amount ($)
+          <input id="amountUSD" type="number" step="100" value="20000"
+            class="w-full mt-1 p-3 bg-white/10 text-white rounded-lg focus:outline-none">
+        </label>
+        <button onclick="calculateROI()"
+          class="w-full mt-4 py-3 bg-cyan-500 hover:bg-blue-600 text-white font-bold rounded-lg transition">Calculate</button>
+      </div>
+      <div id="output-area" class="flex-1 mt-6 hidden">
+        <div id="output" class="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-md space-y-4">
+        </div>
+        <button onclick="downloadPDF()"
+          class="w-full mt-4 py-3 bg-cyan-500 hover:bg-blue-600 text-white font-bold rounded-lg transition">
+          Download Report
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="pdf-report"
+    class="absolute -left-full bg-white text-gray-800 p-8 rounded-xl shadow-lg max-w-xl mx-auto space-y-6">
+    <h2 class="text-2xl font-bold text-center text-blue-600">Kaspa ROI Report</h2>
+    <div class="space-y-4">
+      <div class="border-l-4 border-blue-500 pl-4">
+        <p class="font-semibold">Hashrate (TH/s): <span class="font-normal" id="r-hashrate">294.12</span></p>
+      </div>
+      <div class="border-l-4 border-green-500 pl-4">
+        <p class="font-semibold">Daily Revenue ($): <span class="font-normal" id="r-daily">145.59</span></p>
+      </div>
+      <div class="border-l-4 border-green-400 pl-4">
+        <p class="font-semibold">Monthly Revenue ($): <span class="font-normal" id="r-monthly-revenue">4367.65</span>
+        </p>
+      </div>
+      <div class="border-l-4 border-red-400 pl-4">
+        <p class="font-semibold">Monthly Spending ($): <span class="font-normal" id="r-spending">2075.29</span></p>
+      </div>
+      <div class="border-l-4 border-green-600 pl-4">
+        <p class="font-semibold">Monthly Profit ($): <span class="font-normal" id="r-profit">2292.35</span></p>
+      </div>
+      <div class="border-l-4 border-purple-500 pl-4">
+        <p class="font-semibold">ROI (months): <span class="font-normal" id="r-roi">8.72</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="template-container" style="position: absolute; left: -200%;"></div>
+
+
+
+  <script>
+    // Define a global array to store the calculated values
+    let calculationResults = [];
+
+    function calculateROI() {
+      document.getElementById('report-date').innerText = getFormattedDate();
+      const elPrice = parseFloat(document.getElementById('elPrice').value);
+      const kaspPerDay = parseFloat(document.getElementById('kaspPerDay').value);
+      const kaspaUSD = parseFloat(document.getElementById('kaspaUSD').value);
+      const pricePerThs = parseFloat(document.getElementById('pricePerThs').value);
+      const kwPerThs = parseFloat(document.getElementById('kwPerThs').value);
+      const amountUSD = parseFloat(document.getElementById('amountUSD').value);
+
+      const hashrate = amountUSD / pricePerThs;
+      const dailyRevenue = kaspPerDay * kaspaUSD * hashrate;
+      const monthlyRevenue = dailyRevenue * 30;
+      const spendingMonthly = hashrate * kwPerThs * elPrice * 24 * 30;
+      const profitMonthly = monthlyRevenue - spendingMonthly;
+      const roiMonths = profitMonthly > 0 ? amountUSD / profitMonthly : Infinity;
+
+      // Store the calculated values in the global array
+      calculationResults = {
+        hashrate: hashrate.toFixed(2),
+        dailyRevenue: dailyRevenue.toFixed(2),
+        monthlyRevenue: monthlyRevenue.toFixed(2),
+        spendingMonthly: spendingMonthly.toFixed(2),
+        profitMonthly: profitMonthly.toFixed(2),
+        roiMonths: roiMonths === Infinity ? 'N/A' : roiMonths.toFixed(2),
+      };
+
+      let outputArea = document.getElementById('output-area');
+      let output = document.getElementById('output');
+      output.innerHTML = `
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">Hashrate (TH/s): <span class="font-normal">${calculationResults.hashrate}</span></p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">Daily Revenue ($): <span class="font-normal">${calculationResults.dailyRevenue}</span></p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">Monthly Revenue ($): <span class="font-normal">${calculationResults.monthlyRevenue}</span></p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">Monthly Spending ($): <span class="font-normal">${calculationResults.spendingMonthly}</span></p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">Monthly Profit ($): <span class="font-normal">${calculationResults.profitMonthly}</span></p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-md">
+            <p class="font-semibold">ROI (months): <span class="font-normal">${calculationResults.roiMonths}</span></p>
+          </div>
+      `;
+      outputArea.classList.add('block');
+      outputArea.classList.remove('hidden');
+    }
+
+    async function downloadPDF() {
+      try {
+        // Collect input and output data
+        const data = {
+          electricityPrice: document.getElementById('elPrice').value,
+          kaspaPerDay: document.getElementById('kaspPerDay').value,
+          kaspaPriceUSD: document.getElementById('kaspaUSD').value,
+          pricePerTH: document.getElementById('pricePerThs').value,
+          spendingKWper: document.getElementById('kwPerThs').value,
+          investmentAmount: document.getElementById('amountUSD').value,
+          hashrate: calculationResults.hashrate,
+          dailyRevenue: calculationResults.dailyRevenue,
+          monthlyRevenue: calculationResults.monthlyRevenue,
+          monthlySpending: calculationResults.spendingMonthly,
+          monthlyProfit: calculationResults.profitMonthly,
+          roiMonths: calculationResults.roiMonths,
+        };
+
+        // Fetch the template
+        const res = await fetch('/report-template.html'); // Adjust path if needed
+        const html = await res.text();
+
+        // Inject data into the template
+        const template = html
+          .replace('[[electricityPrice]]', data.electricityPrice)
+          .replace('[[kaspaPerDay]]', data.kaspaPerDay)
+          .replace('[[kaspaPriceUSD]]', data.kaspaPriceUSD)
+          .replace('[[pricePerTH]]', data.pricePerTH)
+          .replace('[[spendingKWper]]', data.spendingKWper)
+          .replace('[[investmentAmount]]', data.investmentAmount)
+          .replace('[[hashrate]]', data.hashrate)
+          .replace('[[dailyRevenue]]', data.dailyRevenue)
+          .replace('[[monthlyRevenue]]', data.monthlyRevenue)
+          .replace('[[monthlySpending]]', data.monthlySpending)
+          .replace('[[monthlyProfit]]', data.monthlyProfit)
+          .replace('[[roiMonths]]', data.roiMonths)
+          .replace('[[currentDate]]', getFormattedDate());
+        
+
+        // Render the template in a hidden container
+        let container = document.getElementById('template-container');
+        container.innerHTML = template;
+
+        // Wait for DOM updates
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        // Render the container to canvas
+        const canvas = await html2canvas(container, { backgroundColor: "#ffffff", scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+
+        // Generate PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        const padding = 10;
+        const xPosition = padding;  // X coordinate for image
+        const yPosition = padding + 10;  // Y coordinate for image, you can adjust the 10px as necessary for margin
+
+        pdf.addImage(imgData, 'PNG', xPosition, yPosition, pdfWidth - 2 * padding, pdfHeight);
+        pdf.save('Kaspa_ROI_Report.pdf');
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+      }
+    }
+
+    function getFormattedDate() {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const yyyy = today.getFullYear();
+      return `Date: ${dd}/${mm}/${yyyy}`;
+    }
+
+  </script>
+</body>
+
+</html>

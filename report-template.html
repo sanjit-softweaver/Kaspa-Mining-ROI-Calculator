@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Kaspa Mining ROI Calculator</title>
+    <style>
+        body {
+            font-family: Inter;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; font-family: Arial, sans-serif;padding: 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="700" cellpadding="0" cellspacing="0"
+                    style="padding: 40px;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="left" style="padding-bottom: 30px;">
+                            <img src="/logo.jpg" alt="Mr.Crypto Mining"
+                                style="display: block;" width="200" />
+                            <hr align="left"
+                                style="border: none; border-top: 1px solid #000000; margin-top: 20px; z-index:2" />
+                            <hr align="left"
+                                style="border: none; border-top: 4px solid #00c853; margin-top: -3px; width: 150px; height: 5px;" />
+                        </td>
+                    </tr>
+
+                    <!-- Title -->
+                    <tr>
+                        <td align="left"
+                            style="padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <h2 style="margin: 0; font-size: 20px; color: #111;">Kaspa Mining <strong>ROI
+                                    Calculator</strong></h2>
+                            <p style="font-size: 12px; color: #888;">[[currentDate]]</p>
+                        </td>
+                    </tr>
+
+                    <!-- Input Section -->
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <p style="font-size: 14px; color: #000; margin-bottom: 10px;">KASPA MINING ROI
+                                <strong>INPUTS</strong>
+                            </p>
+                            <table width="100%" cellpadding="10" cellspacing="0"
+                                style="border-collapse: collapse; font-size: 13px; color: #444;">
+                                <tr style="text-align: left; border-top: 1px solid rgba(0, 0, 0, 0.1) ;">
+                                    <td>
+                                        <label style="font-size: 10px; color: rgba(0, 0, 0, 0.5);">Electricity Price per kWh ($)</label><br>
+                                        <strong>[[electricityPrice]]</strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Kaspa per Day per TH/s</label><br>
+                                        <strong>[[kaspaPerDay]]</strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Kaspa Price in USD</label><br>
+                                        <strong>[[kaspaPriceUSD]]</strong>
+                                    </td>
+                                </tr>
+                                <tr style="text-align: left; border-top: 1px solid rgba(0, 0, 0, 0.1) ;border-bottom: 1px solid rgba(0, 0, 0, 0.1) ;">
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Price per TH/s ($)</label><br>
+                                        <strong>[[pricePerTH]]</strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Spending KW per TH/s</label><br>
+                                        <strong>[[spendingKWper]]</strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Investment Amount ($)</label><br>
+                                        <strong>[[investmentAmount]]</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Result Section -->
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <p style="font-size: 14px; color: #000; margin-bottom: 10px;">KASPA MINING ROI
+                                <strong>RESULTS</strong>
+                            </p>
+                            <table width="40%" cellpadding="10" cellspacing="0"
+                                style="border-collapse: collapse; font-size: 13px; color: #444;">
+                                <tr>
+                                    <td>Hashrate (TH/s):</td>
+                                    <td><strong>[[hashrate]]</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Daily Revenue ($):</td>
+                                    <td><strong>[[dailyRevenue]]</strong></td>
+                                </tr>
+                                <tr style="background: #f3f3f3;">
+                                    <td>Monthly Revenue ($):</td>
+                                    <td><strong>[[monthlyRevenue]]</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Spending ($):</td>
+                                    <td><strong>[[monthlySpending]]</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Profit ($):</td>
+                                    <td><strong>[[monthlyProfit]]</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>ROI (months):</td>
+                                    <td><strong>[[roiMonths]]</strong></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
