@@ -113,8 +113,8 @@
       const hashrate = amountUSD / pricePerThs;
       const dailyRevenue = kaspPerDay * kaspaUSD * hashrate;
       const monthlyRevenue = dailyRevenue * 30;
-      const spendingMonthly = hashrate * kwPerThs * elPrice * 24 * 30;
-      const profitMonthly = monthlyRevenue - spendingMonthly;
+      const monthlyElectricity = hashrate * kwPerThs * elPrice * 24 * 30;
+      const profitMonthly = monthlyRevenue - monthlyElectricity;
       const roiMonths = profitMonthly > 0 ? amountUSD / profitMonthly : Infinity;
 
       // Store the calculated values in the global array
@@ -122,7 +122,7 @@
         hashrate: hashrate.toFixed(2),
         dailyRevenue: dailyRevenue.toFixed(2),
         monthlyRevenue: monthlyRevenue.toFixed(2),
-        spendingMonthly: spendingMonthly.toFixed(2),
+        monthlyElectricity: monthlyElectricity.toFixed(2),
         profitMonthly: profitMonthly.toFixed(2),
         roiMonths: roiMonths === Infinity ? 'N/A' : roiMonths.toFixed(2),
       };
@@ -140,7 +140,7 @@
             <p class="font-semibold">Monthly Revenue ($): <span class="font-normal">${calculationResults.monthlyRevenue}</span></p>
           </div>
           <div class="bg-white/5 p-4 rounded-md">
-            <p class="font-semibold">Monthly Spending ($): <span class="font-normal">${calculationResults.spendingMonthly}</span></p>
+            <p class="font-semibold">Monthly Electricity ($): <span class="font-normal">${calculationResults.monthlyElectricity}</span></p>
           </div>
           <div class="bg-white/5 p-4 rounded-md">
             <p class="font-semibold">Monthly Profit ($): <span class="font-normal">${calculationResults.profitMonthly}</span></p>
@@ -166,7 +166,7 @@
           hashrate: calculationResults.hashrate,
           dailyRevenue: calculationResults.dailyRevenue,
           monthlyRevenue: calculationResults.monthlyRevenue,
-          monthlySpending: calculationResults.spendingMonthly,
+          monthlyElectricity: calculationResults.monthlyElectricity,
           monthlyProfit: calculationResults.profitMonthly,
           roiMonths: calculationResults.roiMonths,
         };
@@ -186,11 +186,10 @@
           .replace('[[hashrate]]', data.hashrate)
           .replace('[[dailyRevenue]]', data.dailyRevenue)
           .replace('[[monthlyRevenue]]', data.monthlyRevenue)
-          .replace('[[monthlySpending]]', data.monthlySpending)
+          .replace('[[monthlyElectricity]]', data.monthlyElectricity)
           .replace('[[monthlyProfit]]', data.monthlyProfit)
           .replace('[[roiMonths]]', data.roiMonths)
           .replace('[[currentDate]]', getFormattedDate());
-        
 
         // Render the template in a hidden container
         let container = document.getElementById('template-container');
@@ -199,22 +198,27 @@
         // Wait for DOM updates
         await new Promise(resolve => requestAnimationFrame(resolve));
 
-        // Render the container to canvas
-        const canvas = await html2canvas(container, { backgroundColor: "#ffffff", scale: 2 });
+        // Render the container to canvas with a static height of 700px
+        const canvas = await html2canvas(container, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          height: 700, // Set static height
+        });
         const imgData = canvas.toDataURL("image/png");
 
         // Generate PDF
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
         const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        // Scale the image to fit within the PDF page dimensions
+        const padding = 10; // Padding around the image
         const imgProps = pdf.getImageProperties(imgData);
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const imgWidth = pdfWidth - 2 * padding; // Account for padding
+        const imgHeight = 180; // Static height for the content
 
-        const padding = 10;
-        const xPosition = padding;  // X coordinate for image
-        const yPosition = padding + 10;  // Y coordinate for image, you can adjust the 10px as necessary for margin
-
-        pdf.addImage(imgData, 'PNG', xPosition, yPosition, pdfWidth - 2 * padding, pdfHeight);
+        pdf.addImage(imgData, 'PNG', padding, padding, imgWidth, imgHeight);
         pdf.save('Kaspa_ROI_Report.pdf');
       } catch (error) {
         console.error("Error generating PDF:", error);
