@@ -93,12 +93,130 @@
     </div>
   </div>
 
-  <div id="template-container" style="position: absolute; left: -200%;"></div>
+  <div id="template-container" style="position: absolute; left: -200%;"><!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Kaspa Mining ROI Calculator</title>
+        <style>
+            body {
+                font-family: Inter;
+            }
+        </style>
+    </head>
+    
+    <body style="margin: 0; font-family: Arial, sans-serif;padding: 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="700" cellpadding="0" cellspacing="0" style="padding: 40px;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="left" style="padding-bottom: 30px;">
+                            <img src="/logo.jpg" alt="Mr.Crypto Mining"
+                                 style="display: block;" width="200" />
+                            <hr align="left"
+                                style="border: none; border-top: 1px solid #000000; margin-top: 20px; z-index:2" />
+                            <hr align="left"
+                                style="border: none; border-top: 4px solid #00c853; margin-top: -3px; width: 150px; height: 5px;" />
+                        </td>
+                    </tr>
+
+                    <!-- Title -->
+                    <tr>
+                        <td align="left" style="padding-bottom: 20px;">
+                            <h2 style="margin: 0; font-size: 20px; color: #111;">
+                                Kaspa Mining <strong>ROI Calculator</strong>
+                            </h2>
+                        </td>
+                    </tr>
+
+                    <!-- Input Section -->
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <p style="font-size: 14px; color: #000; margin-bottom: 10px;">KASPA MINING ROI <strong>INPUTS</strong></p>
+                            <table width="100%" cellpadding="10" cellspacing="0"
+                                   style="border-collapse: collapse; font-size: 13px; color: #444;">
+                                <tr style="text-align: left; border-top: 1px solid rgba(0, 0, 0, 0.1);">
+                                    <td>
+                                        <label style="font-size: 10px; color: rgba(0, 0, 0, 0.5);">Electricity Price per kWh ($)</label><br>
+                                        <strong id="electricityPrice"></strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Kaspa Price in USD</label><br>
+                                        <strong id="kaspaPriceUSD"></strong>
+                                    </td>
+                                </tr>
+                                <tr style="text-align: left; border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1);">
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Price per TH/s ($)</label><br>
+                                        <strong id="pricePerTH"></strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Spending KW per TH/s</label><br>
+                                        <strong id="spendingKWper"></strong>
+                                    </td>
+                                    <td>
+                                        <label style="font-size: 10px;color: rgba(0, 0, 0, 0.5);">Investment Amount ($)</label><br>
+                                        <strong id="investmentAmount"></strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Result Section -->
+                    <tr>
+                        <td>
+                            <p style="font-size: 14px; color: #000; margin-bottom: 10px;">KASPA MINING ROI <strong>RESULTS</strong></p>
+                            <table width="40%" cellpadding="10" cellspacing="0"
+                                   style="border-collapse: collapse; font-size: 13px; color: #444;">
+                                <tr>
+                                    <td>Hashrate (TH/s):</td>
+                                    <td><strong id="hashrate"></strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Daily Revenue ($):</td>
+                                    <td><strong id="dailyRevenue"></strong></td>
+                                </tr>
+                                <tr style="background: #f3f3f3;">
+                                    <td>Monthly Revenue ($):</td>
+                                    <td><strong id="monthlyRevenue"></strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Electricity ($):</td>
+                                    <td><strong id="monthlyElectricity"></strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Profit ($):</td>
+                                    <td><strong id="monthlyProfit"></strong></td>
+                                </tr>
+                                <tr>
+                                    <td>ROI (months):</td>
+                                    <td><strong id="roiMonths"></strong></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p style="font-size: 12px; color: #000; margin-top: 30px;">
+                                <sup style="color: red;">*</sup>Profits are not guaranteed. Calculation made based on market conditions, mining difficulty and exchange rate on <strong id="currentDate"></strong>.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    </body>
+    </html>
+    </div>
 
 
 
   <script>
-    // Define a global array to store the calculated values
     let calculationResults = [];
 
     function calculateROI() {
@@ -155,7 +273,6 @@
 
     async function downloadPDF() {
       try {
-        // Collect input and output data
         const data = {
           electricityPrice: document.getElementById('elPrice').value,
           kaspaPerDay: document.getElementById('kaspPerDay').value,
@@ -169,54 +286,34 @@
           monthlyElectricity: calculationResults.monthlyElectricity,
           monthlyProfit: calculationResults.profitMonthly,
           roiMonths: calculationResults.roiMonths,
+          currentDate: getFormattedDate(),
         };
 
-        // Fetch the template
-        const res = await fetch('/report-template.html'); // Adjust path if needed
-        const html = await res.text();
+        Object.keys(data).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.textContent = data[key];
+            }
+        });
 
-        // Inject data into the template
-        const template = html
-          .replace('[[electricityPrice]]', data.electricityPrice)
-          .replace('[[kaspaPerDay]]', data.kaspaPerDay)
-          .replace('[[kaspaPriceUSD]]', data.kaspaPriceUSD)
-          .replace('[[pricePerTH]]', data.pricePerTH)
-          .replace('[[spendingKWper]]', data.spendingKWper)
-          .replace('[[investmentAmount]]', data.investmentAmount)
-          .replace('[[hashrate]]', data.hashrate)
-          .replace('[[dailyRevenue]]', data.dailyRevenue)
-          .replace('[[monthlyRevenue]]', data.monthlyRevenue)
-          .replace('[[monthlyElectricity]]', data.monthlyElectricity)
-          .replace('[[monthlyProfit]]', data.monthlyProfit)
-          .replace('[[roiMonths]]', data.roiMonths)
-          .replace('[[currentDate]]', getFormattedDate());
-
-        // Render the template in a hidden container
         let container = document.getElementById('template-container');
-        container.innerHTML = template;
-
-        // Wait for DOM updates
         await new Promise(resolve => requestAnimationFrame(resolve));
 
-        // Render the container to canvas with a static height of 700px
         const canvas = await html2canvas(container, {
           backgroundColor: "#ffffff",
           scale: 2,
-          height: 700, // Set static height
+          height: 700,
         });
         const imgData = canvas.toDataURL("image/png");
-
-        // Generate PDF
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        // Scale the image to fit within the PDF page dimensions
-        const padding = 10; // Padding around the image
+        const padding = 10; 
         const imgProps = pdf.getImageProperties(imgData);
-        const imgWidth = pdfWidth - 2 * padding; // Account for padding
-        const imgHeight = 180; // Static height for the content
+        const imgWidth = pdfWidth - 2 * padding; 
+        const imgHeight = 180; 
 
         pdf.addImage(imgData, 'PNG', padding, padding, imgWidth, imgHeight);
         pdf.save('Kaspa_ROI_Report.pdf');
@@ -228,7 +325,7 @@
     function getFormattedDate() {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, '0');
-      const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const mm = String(today.getMonth() + 1).padStart(2, '0'); 
       const yyyy = today.getFullYear();
       return `${dd}/${mm}/${yyyy}`;
     }
